@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laptop Orchestra - Drums</title>
+  
+  <!-- External Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.39/Tone.min.js"></script>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  
+  <style>
+    body { 
+      margin: 0; 
+      background: #111; 
+      color: white; 
+      font-family: Arial, sans-serif; 
+      overflow: hidden;
+    }
+    
+    #info { 
+      position: absolute; 
+      top: 20px; 
+      left: 20px; 
+      z-index: 100;
+    }
+    
+    button { 
+      padding: 10px 20px; 
+      margin: 10px; 
+      font-size: 16px; 
+      background: #333;
+      color: white;
+      border: 1px solid #555;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    
+    button:hover {
+      background: #555;
+    }
+    
+    button:disabled {
+      background: #222;
+      color: #666;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  <div id="info">
+    <h3>Laptop Orchestra - Drums</h3>
+    <p>BPM: <span id="bpm">—</span></p>
+    <p>Ticks: <span id="ticks">0</span></p>
+    <p>Status: <span id="status">Not Connected</span></p>
+    <button id="startBtn">Start</button>
+  </div>
+
+  <!-- External JavaScript -->
+  <script src="app.js"></script>
+</body>
+</html>
