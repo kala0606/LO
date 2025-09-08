@@ -1,53 +1,37 @@
 #!/bin/bash
 
-# Orchestra Conductor - Fly.io Deployment Script
-# Make executable with: chmod +x deploy.sh
+# Orchestra Conductor Deployment Script
+# This script helps deploy the conductor to Fly.io
 
-echo "🎵 Orchestra Conductor - Fly.io Deployment"
-echo "=========================================="
+echo "🎵 Orchestra Conductor Deployment Script"
+echo "========================================"
 
 # Check if flyctl is installed
 if ! command -v fly &> /dev/null; then
     echo "❌ Fly CLI not found. Please install it first:"
-    echo "   macOS: brew install flyctl"
-    echo "   Linux: curl -L https://fly.io/install.sh | sh"
-    echo "   Windows: iwr https://fly.io/install.ps1 -useb | iex"
+    echo "   brew install flyctl"
+    echo "   or visit: https://fly.io/docs/hands-on/install-flyctl/"
     exit 1
 fi
 
 # Check if user is logged in
 if ! fly auth whoami &> /dev/null; then
-    echo "🔐 Please log in to Fly.io:"
-    fly auth login
+    echo "🔐 Please log in to Fly.io first:"
+    echo "   fly auth login"
+    exit 1
 fi
 
-echo ""
-echo "📦 Installing dependencies..."
-npm install
-
-echo ""
-echo "🚀 Deploying to Fly.io..."
-
-# Check if app already exists
-if [ ! -f fly.toml ]; then
-    echo "🆕 First deployment - launching new app..."
-    fly launch --no-deploy
-fi
+echo "✅ Fly CLI found and authenticated"
 
 # Deploy the app
+echo "🚀 Deploying to Fly.io..."
 fly deploy
 
-echo ""
-echo "✅ Deployment complete!"
-echo "🌐 Your conductor is running at: $(fly status --json | jq -r '.Hostname')"
-echo ""
-echo "🎵 To test your deployment:"
-echo "   1. Open the URL above in your browser"
-echo "   2. Adjust the BPM and see it update in real-time"
-echo "   3. Connect your drum client to the URL"
-echo ""
-echo "📊 Useful commands:"
-echo "   fly logs          - View real-time logs"
-echo "   fly status        - Check app status"
-echo "   fly open          - Open app in browser"
-echo "   fly scale memory 512 - Increase memory if needed"
+if [ $? -eq 0 ]; then
+    echo "✅ Deployment successful!"
+    echo "🌐 Opening your app..."
+    fly open
+else
+    echo "❌ Deployment failed. Check the logs above for details."
+    exit 1
+fi
