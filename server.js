@@ -54,7 +54,7 @@ app.get("/", (req, res) => {
 function startTicking() {
   if (interval) clearInterval(interval);
   let count = 0;
-  const step = (60000 / bpm) / 4; // 16th notes
+  const step = (60000 / bpm) * 4; // Once per bar (4 beats)
   interval = setInterval(() => {
     count++;
     io.emit("tick", { time: Date.now(), bpm, count });
