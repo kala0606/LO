@@ -1,108 +1,81 @@
-// Laptop Orchestra - Drums Application
-// Main JavaScript file with Socket.IO integration
+// STUDENT-FRIENDLY VERSION
+// This explains the concepts step by step
 
 let socket = null;
 let bpm = 120;
 let tickCount = 0;
-let isConnected = false;
+let kickSynth = null;
 
-// DOM elements
-const startBtn = document.getElementById('startBtn');
-const bpmDisplay = document.getElementById('bpm');
-const ticksDisplay = document.getElementById('ticks');
-const statusDisplay = document.getElementById('status');
-
-// Start button event listener
+// STEP 1: What happens when you click "Start"
 startBtn.addEventListener('click', async () => {
   try {
-    // Start Tone.js
+    // Start Tone.js (this lets us make sounds)
     await Tone.start();
-    console.log('Tone.js started');
+    console.log('🎵 Tone.js started!');
     
-    // Connect to server
-    socket = io('https://lo-smi.fly.dev/');
+    // Connect to the conductor server
+    socket = io('http://localhost:3000/');
     
-    // Socket event listeners
-    socket.on('connect', () => {
-      isConnected = true;
-      statusDisplay.textContent = 'Connected';
-      startBtn.disabled = true;
-      startBtn.textContent = 'Connected';
-      console.log('Connected to server');
-    });
-    
-    socket.on('disconnect', () => {
-      isConnected = false;
-      statusDisplay.textContent = 'Disconnected';
-      startBtn.disabled = false;
-      startBtn.textContent = 'Reconnect';
-    });
-    
+    // Listen for ticks from the conductor
     socket.on('tick', (data) => {
-      bpm = data.bpm;
-      tickCount = data.count;
+      bpm = data.bpm;        // How fast the music is
+      tickCount = data.count; // Which beat we're on
       
-      // Update display
-      bpmDisplay.textContent = bpm;
-      ticksDisplay.textContent = tickCount;
+      console.log(`🎶 Tick ${tickCount} at ${bpm} BPM`);
       
-      // Your drum code goes here!
-      // This runs every tick from the conductor
-      handleTick(tickCount, bpm);
+      // This is where YOU add your music!
+      playYourMusic();
     });
     
   } catch (error) {
     console.error('Error:', error);
-    statusDisplay.textContent = 'Error: ' + error.message;
   }
 });
 
-// Handle each tick from the conductor
-function handleTick(tick, currentBpm) {
-  console.log('Tick:', tick, 'BPM:', currentBpm);
+// STEP 2: Create a simple kick drum sound
+function createKickDrum() {
+  kickSynth = new Tone.MembraneSynth({
+    pitchDecay: 0.05,
+    octaves: 10,
+    oscillator: { type: "square" },
+    envelope: {
+      attack: 0.001,
+      decay: 0.4,
+      sustain: 0.01,
+      release: 1.4
+    }
+  }).toDestination();
   
-  // Add your drum logic here
-  // For example:
-  // - Trigger drum sounds based on tick patterns
-  // - Respond to tempo changes
-  // - Create rhythmic patterns
+  console.log('🥁 Kick drum created!');
 }
 
-// p5.js setup
-function setup() {
-  createCanvas(windowWidth, windowHeight);
-  console.log('p5.js canvas created');
-}
-
-function draw() {
-  background(20);
-  
-  // Visual feedback
-  if (isConnected) {
-    // Connected state - pulsing green circle
-    fill(0, 255, 0, 150);
-    let pulse = sin(frameCount * 0.1) * 20;
-    circle(width/2, height/2, 50 + pulse);
-    
-    // Show BPM as text
-    fill(255);
-    textAlign(CENTER);
-    textSize(24);
-    text(`BPM: ${bpm}`, width/2, height/2 + 50);
-    text(`Tick: ${tickCount}`, width/2, height/2 + 80);
-  } else {
-    // Disconnected state - static red circle
-    fill(255, 0, 0, 150);
-    circle(width/2, height/2, 30);
-    
-    fill(255);
-    textAlign(CENTER);
-    textSize(18);
-    text('Not Connected', width/2, height/2 + 50);
+// STEP 3: This function runs every time you get a tick
+function playYourMusic() {
+  // Create kick drum if we haven't yet
+  if (!kickSynth) {
+    createKickDrum();
   }
-}
-
-// Handle window resize
-function windowResized() {
-  resizeCanvas(windowWidth, windowHeight);
+  
+  // BASIC: Play kick drum on every tick
+  kickSynth.triggerAttackRelease("C1", "8n");
+  console.log('🥁 Kick played!');
+  
+  // STUDENT EXERCISES - Try uncommenting these one by one:
+  
+  // Exercise 1: Play kick only on even ticks (0, 2, 4, 6...)
+  // if (tickCount % 2 === 0) {
+  //   kickSynth.triggerAttackRelease("C1", "8n");
+  // }
+  
+  // Exercise 2: Play kick only every 4 ticks (0, 4, 8, 12...)
+  // if (tickCount % 4 === 0) {
+  //   kickSynth.triggerAttackRelease("C1", "8n");
+  // }
+  
+  // Exercise 3: Play different sounds based on tick number
+  // if (tickCount % 4 === 0) {
+  //   kickSynth.triggerAttackRelease("C1", "8n"); // Low kick
+  // } else if (tickCount % 2 === 0) {
+  //   kickSynth.triggerAttackRelease("C2", "8n"); // Higher kick
+  // }
 }
