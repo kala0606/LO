@@ -5,6 +5,8 @@ let socket = null;
 let bpm = 120;
 let tickCount = 0;
 let kickSynth = null;
+let lastTickTime = 0;
+let timingStats = { min: Infinity, max: -Infinity, avg: 0, count: 0 };
 
 // STEP 1: What happens when you click "Start"
 startBtn.addEventListener('click', async () => {
@@ -21,7 +23,25 @@ startBtn.addEventListener('click', async () => {
       bpm = data.bpm;        // How fast the music is
       tickCount = data.count; // Which beat we're on
       
-      console.log(`🎶 Tick ${tickCount} at ${bpm} BPM`);
+      // Analyze timing precision
+      if (lastTickTime > 0) {
+        const interval = data.time - lastTickTime;
+        const expectedInterval = (60000 / bpm) / 4; // Quarter note timing
+        const drift = interval - expectedInterval;
+        
+        // Update timing stats
+        timingStats.min = Math.min(timingStats.min, drift);
+        timingStats.max = Math.max(timingStats.max, drift);
+        timingStats.count++;
+        timingStats.avg = (timingStats.avg * (timingStats.count - 1) + drift) / timingStats.count;
+        
+        // Log timing info (only every 16th tick to avoid spam)
+        if (tickCount % 16 === 0) {
+          console.log(`🎶 Tick ${tickCount} | Drift: ${drift.toFixed(1)}ms | Avg: ${timingStats.avg.toFixed(1)}ms`);
+        }
+      }
+      
+      lastTickTime = data.time;
       
       // This is where YOU add your music!
       playYourMusic();

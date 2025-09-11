@@ -8,6 +8,8 @@ const io = new Server(server, { cors: { origin: "*" } });
 
 let bpm = 120;
 let interval = null;
+let expectedTime = 0;
+let tickCount = 0;
 
 // Serve UI
 app.get("/", (req, res) => {
@@ -50,17 +52,39 @@ app.get("/", (req, res) => {
   `);
 });
 
-// Ticking function
+// Precise ticking function with drift correction
 function startTicking() {
   if (interval) clearInterval(interval);
-  let count = 0;
-  // 16 ticks per bar = 4 ticks per beat = 1 tick per quarter note
-  // So we divide by 4 to get quarter note timing
-  const step = (60000 / bpm) / 1; // 16 ticks per bar (quarter note timing)
-  interval = setInterval(() => {
-    count++;
-    io.emit("tick", { time: Date.now(), bpm, count });
-  }, step);
+  tickCount = 0;
+  expectedTime = Date.now();
+  
+  // Calculate tick interval in milliseconds
+  // 4 ticks per beat = 16 ticks per bar (4 beats)
+  const tickInterval = (60000 / bpm) / 4; // Quarter note timing
+  
+  function tick() {
+    const now = Date.now();
+    const drift = now - expectedTime;
+    
+    // Send tick with precise timing info
+    io.emit("tick", { 
+      time: now, 
+      bpm, 
+      count: tickCount,
+      drift: drift,
+      expectedTime: expectedTime
+    });
+    
+    tickCount++;
+    expectedTime += tickInterval;
+    
+    // Schedule next tick with drift correction
+    const nextTick = Math.max(0, tickInterval - drift);
+    interval = setTimeout(tick, nextTick);
+  }
+  
+  // Start the first tick
+  tick();
 }
 
 io.on("connection", (socket) => {
