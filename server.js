@@ -54,7 +54,9 @@ app.get("/", (req, res) => {
 function startTicking() {
   if (interval) clearInterval(interval);
   let count = 0;
-  const step = (60000 / bpm) * 1; // Once per bar (4 beats)
+  // 16 ticks per bar = 4 ticks per beat = 1 tick per quarter note
+  // So we divide by 4 to get quarter note timing
+  const step = (60000 / bpm) / 4; // 16 ticks per bar (quarter note timing)
   interval = setInterval(() => {
     count++;
     io.emit("tick", { time: Date.now(), bpm, count });
