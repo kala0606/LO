@@ -60,7 +60,7 @@ function startTicking() {
   
   // Calculate tick interval in milliseconds
   // 4 ticks per beat = 16 ticks per bar (4 beats)
-  const tickInterval = (60000 / bpm) / 4; // Quarter note timing
+  const tickInterval = (60000 / bpm); // Quarter note timing
   
   function tick() {
     const now = Date.now();
